@@ -9,10 +9,11 @@ using System.Net;
 using System.IO;
 using System.Text;
 using System.Data;
+using System.Xml.Linq;
 
 namespace GasPrices_API
 {
-    public partial class News : System.Web.UI.Page
+    public partial class GasPrices : System.Web.UI.Page
     {
         /// <summary>
         /// Page Load Method
@@ -27,71 +28,89 @@ namespace GasPrices_API
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="topic"></param>
+        /// <param name="address"></param>
         /// <returns></returns>
         [WebMethod]
-        public static NewsArticle[] GetNewsArticles(string topic)
+        public static string GetPrices(string address)
         {
-            // Initialize the List of News Articles
-            List<NewsArticle> articles = new List<NewsArticle>();
+            Location location = new Location();
+            location.latitude = 0.00;
+            location.longitude = 0.00;
 
-            // Initialize the Google News RSS Feed request
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://news.google.com/news?q=" + topic + "&output=rss");
+            // Initialize the List of News Articles
+            List<GasPrice> gasPrices = new List<GasPrice>();
+
+            // Initialize the Google Maps request
+            HttpWebRequest geocodeRequest = (HttpWebRequest)WebRequest.Create(
+                "https://maps.googleapis.com/maps/api/geocode/xml?address=" + HttpUtility.UrlEncode(address) + "&key=AIzaSyBAKxqcK17_ngThmKCHFLw4g1_aB1eOHDY"
+            );
 
             // Specify GET Method Request
-            request.Method = "GET";
+            geocodeRequest.Method = "GET";
 
-            // Perform the Request
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            HttpWebResponse geocodeResponse = (HttpWebResponse)geocodeRequest.GetResponse();
 
             // Check the Response State Code for Success
-            if (response.StatusCode == HttpStatusCode.OK)
+            if (geocodeResponse.StatusCode == HttpStatusCode.OK)
             {
-                Stream receiveStream = response.GetResponseStream();
+                var xdoc = XDocument.Load(geocodeResponse.GetResponseStream());
+
+                var result = xdoc.Element("GeocodeResponse").Element("result");
+                var locationElement = result.Element("geometry").Element("location");
+                var lat = locationElement.Element("lat");
+                var lng = locationElement.Element("lng");
+
+                location.latitude = double.Parse(lat.Value);
+                location.longitude = double.Parse(lng.Value);
+            }
+            else
+            {
+                return "";
+            }
+
+            // Initialize the Google News RSS Feed request
+            HttpWebRequest gasPriceRequest = (HttpWebRequest)WebRequest.Create(
+                "http://devapi.mygasfeed.com/stations/radius/" + location.latitude.ToString() + "/" + location.longitude.ToString() + "/5/reg/distance/rfej9napna.json"
+            );
+
+            // Specify GET Method Request
+            gasPriceRequest.Method = "GET";
+
+            // Perform the Request
+            HttpWebResponse gasPriceResponse = (HttpWebResponse)gasPriceRequest.GetResponse();
+
+            // Check the Response State Code for Success
+            if (gasPriceResponse.StatusCode == HttpStatusCode.OK)
+            {
+                Stream receiveStream = gasPriceResponse.GetResponseStream();
                 StreamReader readStream = null;
 
                 // Check the Character Set of the Response
-                if (response.CharacterSet == "")
+                if (gasPriceResponse.CharacterSet == "")
                 {
                     readStream = new StreamReader(receiveStream);
                 }
                 else
                 {
-                    readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
+                    readStream = new StreamReader(receiveStream, Encoding.GetEncoding(gasPriceResponse.CharacterSet));
                 }
 
                 // Convert the Stream in a JSON string
                 string data = readStream.ReadToEnd();
 
-                // Initialize a DataSet to store the parsed information
-                DataSet ds = new DataSet();
-                StringReader reader = new StringReader(data);
-                ds.ReadXml(reader);
-                DataTable articleTable = new DataTable();
-
-                // Make sure the response is not empty
-                if (ds.Tables.Count > 0)
-                {
-                    articleTable = ds.Tables["item"];
-
-                    // Loop through each RSS element and store it as a NewsArticle
-                    foreach (DataRow row in articleTable.Rows)
-                    {
-                        NewsArticle article = new NewsArticle();
-                        article.id = row["item_id"].ToString(); 
-                        article.title = row["title"].ToString();
-                        article.url = row["link"].ToString();
-                        article.date = row["pubDate"].ToString();
-                        article.description = row["description"].ToString();
-                        articles.Add(article);
-                    }
-                }
+                return data;
             }
 
-            return articles.ToArray();
+            return "";
         }
 
-        public class NewsArticle
+        public class Location
+        {
+            public double latitude { get; set; }
+            public double longitude { get; set; }
+        }
+
+        public class GasPrice
         {
             public string title { get; set; }
             public string url { get; set; }
