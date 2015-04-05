@@ -10,7 +10,7 @@ using System.IO;
 using System.Text;
 using System.Data;
 
-namespace GoogleNews_API
+namespace GasPrices_API
 {
     public partial class News : System.Web.UI.Page
     {

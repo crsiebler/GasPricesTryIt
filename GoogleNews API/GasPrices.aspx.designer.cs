@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace GoogleNews_API {
+namespace GasPrices_API {
     
     
     public partial class News {

@@ -11,8 +11,8 @@
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GoogleNews_API</RootNamespace>
-    <AssemblyName>GoogleNews API</AssemblyName>
+    <RootNamespace>GasPrices_API</RootNamespace>
+    <AssemblyName>GasPrices API</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <UseIISExpress>false</UseIISExpress>
     <FileUpgradeFlags>
@@ -61,7 +61,7 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="News.aspx" />
+    <Content Include="GasPrices.aspx" />
     <Content Include="Scripts\jquery-2.1.0-vsdoc.js" />
     <Content Include="Scripts\jquery-2.1.0.js" />
     <Content Include="Scripts\jquery-2.1.0.min.js" />
@@ -74,12 +74,12 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="News.aspx.cs">
-      <DependentUpon>News.aspx</DependentUpon>
+    <Compile Include="GasPrices.aspx.cs">
+      <DependentUpon>GasPrices.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="News.aspx.designer.cs">
-      <DependentUpon>News.aspx</DependentUpon>
+    <Compile Include="GasPrices.aspx.designer.cs">
+      <DependentUpon>GasPrices.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
